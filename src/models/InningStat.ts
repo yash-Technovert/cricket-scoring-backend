@@ -1,7 +1,7 @@
 export class InningStat{
     teamName: string
     runsScored: number
-    wicketsTaken: number
+    wickets: number
     oversPlayed: number
     isFirstInning: boolean
     extras: Extras
