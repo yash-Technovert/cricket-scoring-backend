@@ -15,7 +15,7 @@ function generateInningId(matchId: string, isFirstInning: boolean)
 
 function generatePlayerId(name: string)
 {
-    
+
 }
 
 function generateUserId()

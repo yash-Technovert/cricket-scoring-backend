@@ -13,12 +13,15 @@ const supabase = createClient(url, serviceKey)
 export async function startMatch() {
     let team1 = 'Sunrisers'
     let team2 = 'Kolkata'
+    let TossWinner = team1||team2
     let matchId = generateMatchId(team1, team2);
+    await initiateMatch(matchId, TossWinner)
     let inning1id = generateInningId(matchId, true)
     let inning2id = generateInningId(matchId, false)
     let updates = {}
     await initiateInning(matchId, true, team1)
     await updateScore(inning1id, updates)
+    await endMatch(matchId, team1)
     
     
 }
@@ -44,9 +47,26 @@ async function initiateInning(matchId: string, isFirstInning: boolean, teamName:
     ])
 }
 
-async function endMatch(Id: string)
+async function initiateMatch(Id: string, TossWinner:string)
+{
+    // update match stat to initiate match 
+
+    const { data, error } = await supabase
+    .from('MatchStat')
+    .update({ tossWinner: TossWinner})
+    .eq('id', Id)
+
+}
+
+async function endMatch(Id: string, MatchWinner:string)
 {
     //update match stat
+
+    const { data, error } = await supabase
+    .from('MatchStat')
+    .update({ matchWinner: MatchWinner })
+    .eq('id', Id)
+
 }
 
 export async function getScore(Id: string)
