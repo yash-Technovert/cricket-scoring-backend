@@ -49,7 +49,10 @@ async function endMatch(Id: string)
 
 async function getScore(Id: string)
 {   // get score from the inning stat table.
-
+    let inningScore = await supabase.from('InningStat').select('*').eq('id', Id)
+    .then((response) => {
+        return response.data
+    })
 }
 
 async function updateScore(inningId: string, updates: object)
