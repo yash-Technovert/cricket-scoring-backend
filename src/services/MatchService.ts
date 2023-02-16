@@ -42,13 +42,32 @@ async function initiateInning(matchId: string, isFirstInning: boolean, teamName:
     ])
 }
 
-async function endMatch(Id: string)
+async function initiateMatch(Id: string, TossWinner:string)
+{
+    // update match stat to initiate match 
+    
+    const { data, error } = await supabase
+    .from('MatchStat')
+    .update({ tossWinner: TossWinner})
+    .eq('id', Id)
+
+}
+
+async function endMatch(Id: string, MatchWinner:string)
 {
     //update match stat
+
+    const { data, error } = await supabase
+    .from('MatchStat')
+    .update({ matchWinner: MatchWinner })
+    .eq('id', Id)
+
 }
 
 async function getScore(Id: string)
 {   // get score from the inning stat table.
+    
+    
 
 }
 
