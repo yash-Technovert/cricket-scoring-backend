@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from 'dotenv'
+import { ExtrasType } from "../models/enums/Match";
+import { InningStatResponse } from "../models/InningStat";
 import { generateInningId, generateMatchId } from "./HelperService";
 dotenv.config()
 
@@ -47,11 +49,27 @@ async function endMatch(Id: string)
     //update match stat
 }
 
-async function getScore(Id: string)
+export async function getScore(Id: string)
 {   // get score from the inning stat table.
     let inningScore = await supabase.from('InningStat').select('*').eq('id', Id)
     .then((response) => {
-        return response.data
+        let scores: InningStatResponse=
+         {
+            id: response.data[0].id,
+            teamName: response.data[0].teamName,
+            runsScored: response.data[0].runsScored,
+            wickets: response.data[0].wickets,
+            oversPlayed: response.data[0].oversPlayed,
+            isFirstInning: response.data[0].isFirstInning,
+            extras:{
+                wide: response.data[0].wide,
+                noBall: response.data[0].noBall,
+                bye: response.data[0].bye,
+                legBye: response.data[0].legBye
+            },
+            matchId: response.data[0].matchId
+        }
+        return scores
     })
 }
 
