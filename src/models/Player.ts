@@ -5,5 +5,5 @@ export class Player{
     name: string
     jerseyNumber: string
     playerType: PlayerType
-    teamName: string
+    teamId: string
 }

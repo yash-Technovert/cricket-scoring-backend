@@ -16,7 +16,12 @@ function generateInningId(matchId: string, isFirstInning: boolean)
 
 function generatePlayerId(name: string)
 {
+    
+}
 
+function generateTeamId(teamName: string)
+{
+    
 }
 
 function generateUserId()
