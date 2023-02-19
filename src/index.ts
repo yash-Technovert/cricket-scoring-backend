@@ -49,8 +49,8 @@ app.get('/getplayers', async (req: any, res: any) => {
 
 // start the match
 app.post('/startMatch', async (req: any, res: any) => {
-    const {teamOne, teamTwo,tossWinner} = req.body;
-    const start= await startMatch(teamOne, teamTwo, tossWinner);
+    const {teamOne, teamTwo,tossWinner,tossDecision,id} = req.body;
+    const start= await startMatch({teamOne, teamTwo, tossWinner,tossDecision});
     res.send(start);
 })
 // end match
@@ -62,7 +62,8 @@ app.put('/endmatch', async (req: any, res: any) => {
 
 // update score
 app.put('/updatescore', async (req: any, res: any) => {
-    const {inningId, updates} = req.body;
+    const {inningId} = req.query;
+    const {updates}=req.body
     const update = await updateScore(inningId, updates);
     res.send(update);
 })
@@ -83,14 +84,14 @@ app.post('/startsecondinning', async (req: any, res: any) => {
 
 // get score of an inning
 app.get('/getscore', async (req: any, res: any) => {
-    const {id, matchId} = req.body;
+    const {id, matchId} = req.query;
     console.log(id,matchId)
     const score = await getScore(id,matchId);
     res.send(score);
 })
 
 app.get('/getmatchinfo', async (req: any, res: any) => {
-    const {id} = req.params.id;
+    const {id} = req.query;
     console.log(id)
     const match = await getMatchInfo(id);
     res.send(match);

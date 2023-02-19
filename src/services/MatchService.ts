@@ -1,9 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from 'dotenv'
-import { ExtrasType } from "../models/enums/Match";
 import { InningStatResponse } from "../models/InningStat";
-import { CreateMatch } from "../models/MatchStat";
 import { generateInningId, generateMatchId } from "./HelperService";
+import { StartMatch } from "../models/Match";
 dotenv.config()
 
 let url = process.env.SUPABASE_URL!
@@ -11,10 +10,10 @@ let serviceKey = process.env.SUPABASE_SERVICE_KEY!
 const supabase = createClient(url, serviceKey)
 
 
-export async function startMatch(team1:string, team2:string, tossWinner:string) {
-    let matchId = generateMatchId(team1, team2);
-    await initiateMatch({id: matchId, teamOne: team1, teamTwo: team2, tossWinner: tossWinner})
-    await initiateInning(matchId, true, team1)
+export async function startMatch(startMatch: StartMatch) {
+    let matchId = generateMatchId(startMatch.teamOne, startMatch.teamTwo);
+    await initiateMatch(matchId,startMatch);
+    await initiateInning(matchId, true, startMatch.tossWinner)
 }
 
 export async function createTeam(teamName: string)
@@ -64,7 +63,7 @@ export async function initiateInning(matchId: string, isFirstInning: boolean, te
     ])
 }
 
-async function initiateMatch(matchDetails:CreateMatch)
+async function initiateMatch(matchId:string,matchDetails:StartMatch)
 {
     // update match stat to initiate match 
 
@@ -73,8 +72,9 @@ async function initiateMatch(matchDetails:CreateMatch)
     .insert({
         teamOne: matchDetails.teamOne,
         teamTwo: matchDetails.teamTwo,
-        id: matchDetails.id,
+        id: matchId,
         tossWinner: matchDetails.tossWinner,
+        tossDecision: matchDetails.tossDecision
     })
     if(error) return error;
     return data;

@@ -6,11 +6,5 @@ export class MatchStat{
     teamTwoInningStat: InningStat
     tossWinner: string
     matchWinner: string
-}
-
-export class CreateMatch{
-    id: string
-    teamOne: string
-    teamTwo: string
-    tossWinner: string
+    matchTime:string
 }
