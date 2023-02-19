@@ -13,9 +13,15 @@ function generateInningId(matchId: string, isFirstInning: boolean)
     return `${matchId}:I${isFirstInning ? '1' : '2'}`
 }
 
+
 function generatePlayerId(name: string)
 {
+    
+}
 
+function generateTeamId(teamName: string)
+{
+    
 }
 
 function generateUserId()

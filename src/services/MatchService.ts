@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import * as dotenv from 'dotenv'
 import { ExtrasType } from "../models/enums/Match";
 import { InningStatResponse } from "../models/InningStat";
+import { CreateMatch } from "../models/MatchStat";
 import { generateInningId, generateMatchId } from "./HelperService";
 dotenv.config()
 
@@ -10,23 +11,39 @@ let serviceKey = process.env.SUPABASE_SERVICE_KEY!
 const supabase = createClient(url, serviceKey)
 
 
-export async function startMatch() {
-    let team1 = 'Sunrisers'
-    let team2 = 'Kolkata'
-    let TossWinner = team1||team2
+export async function startMatch(team1:string, team2:string, tossWinner:string) {
     let matchId = generateMatchId(team1, team2);
-    await initiateMatch(matchId, TossWinner)
-    let inning1id = generateInningId(matchId, true)
-    let inning2id = generateInningId(matchId, false)
-    let updates = {}
+    await initiateMatch({id: matchId, teamOne: team1, teamTwo: team2, tossWinner: tossWinner})
     await initiateInning(matchId, true, team1)
-    await updateScore(inning1id, updates)
-    await endMatch(matchId, team1)
-    
+}
+
+export async function createTeam(teamName: string)
+{
+    let { data, error } = await supabase .from('Team').insert([
+        {
+            teamName: teamName
+        }
+    ])
+    if(error) return error;
+    return data;
     
 }
 
-async function initiateInning(matchId: string, isFirstInning: boolean, teamName: string)
+export async function getAllTeams()
+{
+    let { data, error } = await supabase .from('Team').select('*')
+    if(error) return error;
+    return data;
+}
+
+export async function getPlayers(teamId: string)
+{
+    let { data, error } = await supabase .from('Player').select('*').eq('teamId', teamId)
+    if(error) return error;
+    return data;
+}
+
+export async function initiateInning(matchId: string, isFirstInning: boolean, teamName: string)
 {
     let { data, error } = await supabase .from('InningStat').insert([
         {
@@ -47,63 +64,82 @@ async function initiateInning(matchId: string, isFirstInning: boolean, teamName:
     ])
 }
 
-async function initiateMatch(Id: string, TossWinner:string)
+async function initiateMatch(matchDetails:CreateMatch)
 {
     // update match stat to initiate match 
 
     const { data, error } = await supabase
     .from('MatchStat')
-    .update({ tossWinner: TossWinner})
-    .eq('id', Id)
-
+    .insert({
+        teamOne: matchDetails.teamOne,
+        teamTwo: matchDetails.teamTwo,
+        id: matchDetails.id,
+        tossWinner: matchDetails.tossWinner,
+    })
+    if(error) return error;
+    return data;
 }
 
-async function endMatch(Id: string, MatchWinner:string)
+
+export async function endMatch(id: string, matchWinner:string)
 {
     //update match stat
 
     const { data, error } = await supabase
     .from('MatchStat')
-    .update({ matchWinner: MatchWinner })
-    .eq('id', Id)
+    .update({ matchWinner: matchWinner })
+    .eq('id', id);
+    if(error) return error;
+    return data;
 
 }
 
-export async function getScore(Id: string)
+export async function getScore(id: string,matchId:string)
 {   // get score from the inning stat table.
-    let inningScore = await supabase.from('InningStat').select('*').eq('id', Id)
-    .then((response) => {
-        let scores: InningStatResponse=
+    let {data,error} = await supabase.from('InningStat').select('*').eq('id', id).eq('matchId', matchId);
+    let scores: InningStatResponse=
          {
-            id: response.data[0].id,
-            teamName: response.data[0].teamName,
-            runsScored: response.data[0].runsScored,
-            wickets: response.data[0].wickets,
-            oversPlayed: response.data[0].oversPlayed,
-            isFirstInning: response.data[0].isFirstInning,
+            id:data[0].id,
+            teamName:data[0].teamName,
+            runsScored:data[0].runsScored,
+            wickets:data[0].wickets,
+            oversPlayed:data[0].oversPlayed,
+            isFirstInning:data[0].isFirstInning,
             extras:{
-                wide: response.data[0].wide,
-                noBall: response.data[0].noBall,
-                bye: response.data[0].bye,
-                legBye: response.data[0].legBye
+                wide:data[0].wide,
+                noBall:data[0].noBall,
+                bye:data[0].bye,
+                legBye:data[0].legBye
             },
-            matchId: response.data[0].matchId
+            matchId:data[0].matchId
         }
-        return scores
-    })
+    if(error) return error;
+    return scores;
 }
 
-async function updateScore(inningId: string, updates: object)
+export async function updateScore(inningId: string, updates: Object)
 {   //update score after everyball
-    console.log(inningId);
-    let { data, error} = await supabase.from('InningStat')
+    let { data, error} = await supabase
+        .from('InningStat')
         .update(updates)
-        .eq('id', inningId)        
+        .eq('id', inningId) 
+    if(error) return error;
+    return data;      
 }
 
-async function updatePlayerStat(playerId: string, matchId: string, updates: object)
+export async function getMatchInfo(id: string)
+{   //get match info from match stat table
+    let { data, error } = await supabase.from('MatchStat').select('*').eq('id', id);
+    if(error) return error;
+    return data;
+}
+
+
+export async function updatePlayerStat(id: string, matchId: string, updates: object)
 { //update player stat after either the player is out or his over is done.
-    let { data, error } = await supabase.from('PlayerStat').update(updates);
+    let { data, error } = await supabase.from('PlayerStat').update(updates).eq('id', id).eq('matchId', matchId);
+    if(error) return error;
+    return data;
 }
 
 

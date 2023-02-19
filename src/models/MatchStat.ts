@@ -7,3 +7,10 @@ export class MatchStat{
     tossWinner: string
     matchWinner: string
 }
+
+export class CreateMatch{
+    id: string
+    teamOne: string
+    teamTwo: string
+    tossWinner: string
+}
