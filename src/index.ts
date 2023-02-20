@@ -48,7 +48,7 @@ app.get('/getplayers', async (req: any, res: any) => {
 })
 
 // start the match
-app.post('/startMatch', async (req: any, res: any) => {
+app.post('/startmatch', async (req: any, res: any) => {
     const {teamOne, teamTwo,tossWinner} = req.body;
     const start= await startMatch(teamOne, teamTwo, tossWinner);
     res.send(start);
