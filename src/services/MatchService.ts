@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from 'dotenv'
 import { InningStatResponse } from "../models/InningStat";
-import { generateInningId, generateMatchId } from "./HelperService";
+import { generateInningId, generateMatchId, generateTeamId } from "./HelperService";
 import { StartMatch } from "../models/Match";
+import { Player } from "../models/Player";
 dotenv.config()
 
 let url = process.env.SUPABASE_URL!
@@ -18,8 +19,10 @@ export async function startMatch(startMatch: StartMatch) {
 
 export async function createTeam(teamName: string)
 {
+    const teamId= generateTeamId();
     let { data, error } = await supabase .from('Team').insert([
         {
+            id:teamId,
             teamName: teamName
         }
     ])
@@ -38,6 +41,31 @@ export async function getAllTeams()
 export async function getPlayers(teamId: string)
 {
     let { data, error } = await supabase .from('Player').select('*').eq('teamId', teamId)
+    if(error) return error;
+    return data;
+}
+
+export async function createPlayer(player:Player)
+{
+    let { data, error } = await supabase .from('Players').insert([
+        {
+            id:player.id,
+            name: player.name,
+            teamId: player.teamId,
+            jerseyNumber:player.jerseyNumber,
+            playerType:player.playerType
+        }
+    ])
+    if(error) return error;
+    return data;
+}
+
+export async function getMatches()
+{
+    let {data,error}=await supabase
+    .from('MatchStat')
+    .select('*')
+    .eq('matchWinner',null)
     if(error) return error;
     return data;
 }

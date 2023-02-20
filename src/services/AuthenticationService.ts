@@ -10,7 +10,7 @@ const supabase = createClient(url, serviceKey)
 
 export async function createUser(newUser:User)
 {   // Signup the new user in Supabase
-    //  signUp(newUser.email,newUser.password)
+     signUp(newUser.email,newUser.password)
 
     // create a user on Signup
     const { data, error } = await supabase
