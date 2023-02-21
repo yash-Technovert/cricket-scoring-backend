@@ -19,6 +19,7 @@ export function generatePlayerId()
     return uuid().toString();
 }
 
+
 export function generateTeamId()
 {
 

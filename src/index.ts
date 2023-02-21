@@ -42,7 +42,7 @@ app.get('/getteams', async (req: any, res: any) => {
 
 // get all players of a team
 app.get('/getplayers', async (req: any, res: any) => {
-    const {teamId} = req.body;
+    const {teamId} = req.query;
     const players = await getPlayers(teamId);
     res.send(players);  
 })
@@ -54,10 +54,10 @@ app.post('/createplayer',async (req:any,res:any)=>{
 })
 
 // start the match
-app.post('/startMatch', async (req: any, res: any) => {
-    const {teamOne,teamTwo,tossWinner,tossDecision} = req.body;
-    const start= await startMatch({teamOne, teamTwo, tossWinner,tossDecision});
-    res.send(start);
+app.post('/creatematch', async (req: any, res: any) => {
+    const {matchDetails}=req.body
+    const match= await startMatch(matchDetails);
+    res.send(match);
 })
 // end match
 app.put('/endmatch', async (req: any, res: any) => {
@@ -80,12 +80,6 @@ app.post('/updateplayerstat', async (req: any, res: any) => {
     res.send(update);
 })
 
-// initiate second inning
-app.post('/startsecondinning', async (req: any, res: any) => {
-    const {matchId,teamName, isFirstInning} = req.body;
-    const start = await initiateInning( matchId, isFirstInning,teamName);
-    res.send(start);
-})
 
 // get score of an inning
 app.get('/getscore', async (req: any, res: any) => {
