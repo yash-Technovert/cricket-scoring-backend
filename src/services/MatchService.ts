@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from 'dotenv'
-import { ExtrasType } from "../models/enums/Match";
 import { InningStatResponse } from "../models/InningStat";
-import { CreateMatch } from "../models/MatchStat";
-import { generateInningId, generateMatchId } from "./HelperService";
+import { generateInningId, generateMatchId, generateTeamId } from "./HelperService";
+import { CreateMatch, StartMatch } from "../models/Match";
+import { Player } from "../models/Player";
 dotenv.config()
 
 let url = process.env.SUPABASE_URL!
@@ -11,16 +11,57 @@ let serviceKey = process.env.SUPABASE_SERVICE_KEY!
 const supabase = createClient(url, serviceKey)
 
 
-export async function startMatch(team1:string, team2:string, tossWinner:string) {
-    let matchId = generateMatchId(team1, team2);
-    await initiateMatch({id: matchId, teamOne: team1, teamTwo: team2, tossWinner: tossWinner})
-    await initiateInning(matchId, true, team1)
+export async function startMatch(matchDetails: CreateMatch) {
+    let matchId = generateMatchId(matchDetails.teamOne, matchDetails.teamTwo);
+    let newMatch:StartMatch={
+        id:matchId,
+        teamOne:matchDetails.teamOne,
+        teamTwo:matchDetails.teamTwo,
+        tossWinner:matchDetails.tossWinner,
+        tossDecision:matchDetails.tossDecision
+    }
+    await initiateMatch(newMatch);
+    await initiateInning(matchId, true, matchDetails.tossWinner)
+    await initiateInning(matchId, false, matchDetails.tossWinner)
+
+    let matchResponse={
+        matchInfo:{},
+        firstInning:{}
+    }
+
+    let { data, error } = await supabase .from('MatchStat').select('*').eq('id', matchId)
+    if(error) return error;
+    matchResponse.matchInfo=data;
+
+    let { data: data1, error: error1 } = await supabase .from('InningStat').select('*').eq('matchId', matchId).eq('isFirstInning', true)
+    if(error1) return error1;
+    matchResponse.firstInning=data1;
+
+    return matchResponse;
+}
+
+async function initiateMatch(newMatch:StartMatch)
+{
+    let { data, error } = await supabase .from('MatchStat').insert([
+        {
+            id:newMatch.id,
+            teamOne: newMatch.teamOne,
+            teamTwo: newMatch.teamTwo,
+            tossWinner: newMatch.tossWinner,
+            tossDecision: newMatch.tossDecision,
+            matchWinner: null
+        }
+    ])
+    if(error) return error;
+    return data;
 }
 
 export async function createTeam(teamName: string)
 {
+    const teamId= generateTeamId();
     let { data, error } = await supabase .from('Team').insert([
         {
+            id:teamId,
             teamName: teamName
         }
     ])
@@ -38,7 +79,32 @@ export async function getAllTeams()
 
 export async function getPlayers(teamId: string)
 {
-    let { data, error } = await supabase .from('Player').select('*').eq('teamId', teamId)
+    let { data, error } = await supabase .from('Players').select('*').eq('teamId', teamId)
+    if(error) return error;
+    return data;
+}
+
+export async function createPlayer(player:Player)
+{
+    let { data, error } = await supabase .from('Players').insert([
+        {
+            id:player.id,
+            name: player.name,
+            teamId: player.teamId,
+            jerseyNumber:player.jerseyNumber,
+            playerType:player.playerType
+        }
+    ])
+    if(error) return error;
+    return data;
+}
+
+export async function getMatches()
+{
+    let {data,error}=await supabase
+    .from('MatchStat')
+    .select('*')
+    .eq('matchWinner',null)
     if(error) return error;
     return data;
 }
@@ -63,23 +129,6 @@ export async function initiateInning(matchId: string, isFirstInning: boolean, te
         }
     ])
 }
-
-async function initiateMatch(matchDetails:CreateMatch)
-{
-    // update match stat to initiate match 
-
-    const { data, error } = await supabase
-    .from('MatchStat')
-    .insert({
-        teamOne: matchDetails.teamOne,
-        teamTwo: matchDetails.teamTwo,
-        id: matchDetails.id,
-        tossWinner: matchDetails.tossWinner,
-    })
-    if(error) return error;
-    return data;
-}
-
 
 export async function endMatch(id: string, matchWinner:string)
 {
@@ -141,6 +190,21 @@ export async function updatePlayerStat(id: string, matchId: string, updates: obj
     if(error) return error;
     return data;
 }
+
+async function InitiatePlayer(matchId:any,players:any)
+{
+    players.forEach(async (player:any) => {
+        let {data,error}=await supabase
+        .from('PlayerStat').insert({
+            id:`${matchId}_${player.name.substring(4)}`,
+            name:player.name,
+            matchId:matchId,
+        })
+        if(error) return error;
+        return data;
+    })
+}
+
 
 
 

@@ -1,5 +1,5 @@
 import { createUser, generateJwtToken, login } from './services/AuthenticationService';
-import {createTeam, endMatch, getAllTeams, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
 import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
@@ -45,57 +45,54 @@ app.get('/getteams', async (req: any, res: any) => {
 
 // get all players of a team
 app.get('/getplayers', async (req: any, res: any) => {
-    const {teamId} = req.body;
+    const {teamId} = req.query;
     const players = await getPlayers(teamId);
     res.send(players);  
 })
 
+app.post('/createplayer',async (req:any,res:any)=>{
+    const {id,name,teamId,jerseyNumber,playerType}=req.body
+    const player=createPlayer({id,name,teamId,jerseyNumber,playerType})
+    res.send(player)
+})
+
 // start the match
-app.post('/startmatch', async (req: any, res: any) => {
-    const {teamOne, teamTwo,tossWinner} = req.body;
-    const start= await startMatch(teamOne, teamTwo, tossWinner);
-    res.send(start);
+app.post('/creatematch', async (req: any, res: any) => {
+    const {matchDetails}=req.body
+    const match= await startMatch(matchDetails);
+    res.send(match);
 })
 // end match
 app.put('/endmatch', async (req: any, res: any) => {
-    const {id, matchWinner} = req.body;
+    const {id,matchWinner} = req.body;
     const end = await endMatch(id, matchWinner);
     res.send(end);
 })
 
 // update score
 app.put('/updatescore', async (req: any, res: any) => {
-    const {inningId, updates} = req.body;
+    const {inningId,updates}=req.body
     const update = await updateScore(inningId, updates);
     res.send(update);
 })
 
 // update player when a batsman is dismissed or over is completed
-app.post('/updateplayer', async (req: any, res: any) => {
-    const {id,matchId, updates} = req.body;
+app.post('/updateplayerstat', async (req: any, res: any) => {
+    const {id,matchId,updates} = req.body;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
 })
 
-// initiate second inning
-app.post('/startsecondinning', async (req: any, res: any) => {
-    const {matchId, teamName, isFirstInning} = req.body;
-    const start = await initiateInning( matchId, isFirstInning,teamName);
-    res.send(start);
-})
 
 // get score of an inning
 app.get('/getscore', async (req: any, res: any) => {
     const {id, matchId} = req.body;
-    console.log(id,matchId)
     const score = await getScore(id,matchId);
     res.send(score);
 })
 
 app.get('/getmatchinfo', async (req: any, res: any) => {
-    
-    const {id} = req.params.id;
-    console.log(id)
+    const {id} = req.body;
     const match = await getMatchInfo(id);
     res.send(match);
 })

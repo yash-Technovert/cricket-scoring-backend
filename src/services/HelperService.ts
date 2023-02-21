@@ -14,14 +14,16 @@ function generateInningId(matchId: string, isFirstInning: boolean)
 }
 
 
-function generatePlayerId(name: string)
+export function generatePlayerId()
 {
-    
+    return uuid().toString();
 }
 
-function generateTeamId(teamName: string)
+
+export function generateTeamId()
 {
-    
+
+    return uuid().toString()
 }
 
 function generateUserId()
