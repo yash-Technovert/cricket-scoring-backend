@@ -1,4 +1,4 @@
-import { createUser, login } from './services/AuthenticationService';
+import { createUser, generateJwtToken, login } from './services/AuthenticationService';
 import {createTeam, endMatch, getAllTeams, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
 import { generateMatchId} from './services/HelperService';
@@ -7,7 +7,9 @@ import * as cors from 'cors';
 const app = express();
 
 app.use(express.json());
-app.use(cors.default());
+app.use(cors.default({
+    exposedHeaders: 'Authorization'
+}));
 
 app.get('/', (req: any, res: any,next:any) => {
     res.send('Hello World');
@@ -16,14 +18,15 @@ app.get('/', (req: any, res: any,next:any) => {
 app.post('/login', async (req: any, res: any) => {
     const { username, password } = req.body;
     const data= await login(username, password);
-    res.send(data);
-})
+    
+    res.setHeader('Authorization',`Bearer ${generateJwtToken(username)}`)
+    res.status(201).send(data);
+});
 
 // signup user
 app.post('/signup', async (req: any, res: any) => {
     const { firstName, lastName, email, password } = req.body;
     const data= await createUser({firstName, lastName, email, password});
-    console.log(data)
     res.send(data);
 })
 
@@ -90,6 +93,7 @@ app.get('/getscore', async (req: any, res: any) => {
 })
 
 app.get('/getmatchinfo', async (req: any, res: any) => {
+    
     const {id} = req.params.id;
     console.log(id)
     const match = await getMatchInfo(id);
@@ -100,5 +104,4 @@ const port = process.env.port || 3000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
-
 
