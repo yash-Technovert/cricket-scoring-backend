@@ -1,5 +1,5 @@
 import { createUser, login } from './services/AuthenticationService';
-import {createPlayer, createTeam, endMatch, getAllTeams, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
 import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
@@ -39,7 +39,6 @@ app.get('/getteams', async (req: any, res: any) => {
     const teams = await getAllTeams();
     res.send(teams);
 })
-
 // get all players of a team
 app.get('/getplayers', async (req: any, res: any) => {
     const {teamId} = req.query;
@@ -83,8 +82,8 @@ app.post('/updateplayerstat', async (req: any, res: any) => {
 
 // get score of an inning
 app.get('/getscore', async (req: any, res: any) => {
-    const {id, matchId} = req.body;
-    const score = await getScore(id,matchId);
+    const {matchId} = req.query;
+    const score = await getScore(matchId);
     res.send(score);
 })
 
@@ -92,6 +91,11 @@ app.get('/getmatchinfo', async (req: any, res: any) => {
     const {id} = req.body;
     const match = await getMatchInfo(id);
     res.send(match);
+})
+
+app.get('/getmatches',async(req:any,res:any)=>{
+    const matches= await getMatches();
+    res.send(matches)
 })
 
 const port = process.env.port || 3000;

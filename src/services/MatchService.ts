@@ -4,6 +4,7 @@ import { InningStatResponse } from "../models/InningStat";
 import { generateInningId, generateMatchId, generateTeamId } from "./HelperService";
 import { CreateMatch, StartMatch } from "../models/Match";
 import { Player } from "../models/Player";
+import { Matches } from "../models/Matches";
 dotenv.config()
 
 let url = process.env.SUPABASE_URL!
@@ -21,8 +22,8 @@ export async function startMatch(matchDetails: CreateMatch) {
         tossDecision:matchDetails.tossDecision
     }
     await initiateMatch(newMatch);
-    await initiateInning(matchId, true, matchDetails.tossWinner)
-    await initiateInning(matchId, false, matchDetails.tossWinner)
+    await initiateInning(matchId, true, matchDetails.teamOne)
+    await initiateInning(matchId, false, matchDetails.teamTwo)
 
     let matchResponse={
         matchInfo:{},
@@ -101,12 +102,18 @@ export async function createPlayer(player:Player)
 
 export async function getMatches()
 {
-    let {data,error}=await supabase
-    .from('MatchStat')
-    .select('*')
-    .eq('matchWinner',null)
+    let {data,error}=await supabase.from('MatchStat').select('*')
     if(error) return error;
-    return data;
+    const inningData=await getInning()
+    let matches:Matches[]=[]
+    
+}
+
+export async function getInning()
+{
+    let {data,error}=await supabase.from('InningStat').select('*')
+    if(error) return error;
+    return data
 }
 
 export async function initiateInning(matchId: string, isFirstInning: boolean, teamName: string)
@@ -143,27 +150,97 @@ export async function endMatch(id: string, matchWinner:string)
 
 }
 
-export async function getScore(id: string,matchId:string)
+export async function getScore(matchId:string)
 {   // get score from the inning stat table.
-    let {data,error} = await supabase.from('InningStat').select('*').eq('id', id).eq('matchId', matchId);
-    let scores: InningStatResponse=
-         {
-            id:data[0].id,
-            teamName:data[0].teamName,
-            runsScored:data[0].runsScored,
-            wickets:data[0].wickets,
-            oversPlayed:data[0].oversPlayed,
-            isFirstInning:data[0].isFirstInning,
-            extras:{
-                wide:data[0].wide,
-                noBall:data[0].noBall,
-                bye:data[0].bye,
-                legBye:data[0].legBye
-            },
-            matchId:data[0].matchId
+    let {data,error} = await supabase.from('InningStat').select('*').eq('matchId', matchId)
+    if(error) return error
+    if(data[0]?.isFirstInning==true)
+    {
+        
+        if(data[0]?.wickets===10 || data[0]?.oversPLayed>=6)
+        {
+            console.log('MORNING')
+            let scores: InningStatResponse =
+             {
+                id:data[1]?.id1,
+                teamName:data[1]?.teamName,
+                runsScored:data[1]?.runsScored,
+                wickets:data[1]?.wickets,
+                oversPlayed:data[1]?.oversPlayed,
+                isFirstInning:data[1]?.isFirstInning,
+                extras:{
+                    wide:data[1]?.wide,
+                    noBall:data[1]?.noBall,
+                    bye:data[1]?.bye,
+                    legBye:data[1]?.legBye
+                },
+                matchId:data[1]?.matchId
+            }
+            console.log(scores)
+            return scores;
         }
-    if(error) return error;
-    return scores;
+        else{
+            let scores: InningStatResponse ={
+            id:data[0]?.id,
+            teamName:data[0]?.teamName,
+            runsScored:data[0]?.runsScored,
+            wickets:data[0]?.wickets,
+            oversPlayed:data[0]?.oversPlayed,
+            isFirstInning:data[0]?.isFirstInning,
+            extras:{
+                wide:data[0]?.wide,
+                noBall:data[0]?.noBall,
+                bye:data[0]?.bye,
+                legBye:data[0]?.legBye
+            },
+            matchId:data[0]?.matchId
+        }
+        return scores;
+        }
+    }
+    else{
+        if(data[1]?.wickets===10 || data[1]?.oversPlayed>=6)
+        {
+            console.log('EVENING')
+            let scores: InningStatResponse =
+            {
+                id:data[0]?.id,
+                teamName:data[0]?.teamName,
+                runsScored:data[0]?.runsScored,
+                wickets:data[0]?.wickets,
+                oversPlayed:data[0]?.oversPlayed,
+                isFirstInning:data[0]?.isFirstInning,
+                extras:{
+                    wide:data[0]?.wide,
+                    noBall:data[0]?.noBall,
+                    bye:data[0]?.bye,
+                    legBye:data[0]?.legBye
+                },
+                matchId:data[0]?.matchId
+            }
+            return scores;
+        }
+        else{
+            console.log('BYEEE')
+        let scores: InningStatResponse =
+         {
+            id:data[1]?.id,
+            teamName:data[1]?.teamName,
+            runsScored:data[1]?.runsScored,
+            wickets:data[1]?.wickets,
+            oversPlayed:data[1]?.oversPlayed,
+            isFirstInning:data[1]?.isFirstInning,
+            extras:{
+                wide:data[1]?.wide,
+                noBall:data[1]?.noBall,
+                bye:data[1]?.bye,
+                legBye:data[1]?.legBye
+            },
+            matchId:data[1]?.matchId
+        }
+        return scores;
+        }
+    }
 }
 
 export async function updateScore(inningId: string, updates: Object)
