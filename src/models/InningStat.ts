@@ -16,6 +16,8 @@ export class InningStatResponse{
     isFirstInning: boolean
     extras: Extras
     matchId:string
+    four: number
+    six: number
 }
 
 class Extras{
