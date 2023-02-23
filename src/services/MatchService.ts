@@ -296,9 +296,9 @@ export async function updatePlayerStat(id: string, matchId: string, updates: obj
     return data;
 }
 
-export async function getPlayerStat(id:string,matchId:string)
+export async function getPlayerStat(matchId:string)
 {
-    let {data,error}=await supabase .from('PlayerStat').select('*').eq('id',id).eq('matchId',matchId)
+    let {data,error}=await supabase .from('PlayerStat').select('*').eq('matchId',matchId)
     if(error) return error;
     return data;
 }

@@ -80,8 +80,8 @@ app.post('/updateplayerstat', async (req: any, res: any) => {
 })
 
 app.get('/getplayerstat',async(req:any,res:any)=>{
-    const {id,matchId}=req.query
-    const player=await getPlayerStat(id,matchId)
+    const {id}=req.query
+    const player=await getPlayerStat(id)
     res.send(player)
 })
 
