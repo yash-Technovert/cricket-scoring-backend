@@ -1,7 +1,6 @@
 import { createUser, login } from './services/AuthenticationService';
 import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getPlayerStat, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
-import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
 
 const app = express();

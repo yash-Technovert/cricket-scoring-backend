@@ -4,7 +4,7 @@ export { generateInningId, generateMatchId, generateUserId }
 function generateMatchId(teamOne: string, teamTwo: string)
 {
     let date = new Date();
-    let matchId = `${teamOne.toLocaleUpperCase()}v${teamTwo.toLocaleUpperCase()}:${date.toLocaleString().split(',')[0]}`
+    let matchId = `${teamOne.toLocaleUpperCase()}v${teamTwo.toLocaleUpperCase()}:${date.toLocaleString().split(',')[0]}_${date.toLocaleTimeString().split(' ')[0]}`
     return matchId;
 }
 
