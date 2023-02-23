@@ -3,6 +3,8 @@ import {createPlayer, createTeam, endMatch, getAllTeams, getMatchInfo, getPlayer
 import express from 'express';
 import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
+import { auth } from './middleware/auth';
+
 
 const app = express();
 
@@ -19,7 +21,7 @@ app.post('/login', async (req: any, res: any) => {
     const { username, password } = req.body;
     const data= await login(username, password);
     
-    res.setHeader('Authorization',`Bearer ${generateJwtToken(username)}`)
+    res.setHeader('authorization',`${generateJwtToken(username)}`)
     res.status(201).send(data);
 });
 
@@ -31,14 +33,14 @@ app.post('/signup', async (req: any, res: any) => {
 })
 
 // create a new team
-app.post('/createteam',async(req:any,res:any)=>{
+app.post('/createteam',auth,async(req:any,res:any)=>{
     const {teamName} = req.body;
     const team = await createTeam(teamName);
     res.send(team);
 })
 
 // get all teams
-app.get('/getteams', async (req: any, res: any) => {
+app.get('/getteams',async (req: any, res: any) => {
     const teams = await getAllTeams();
     res.send(teams);
 })
@@ -50,14 +52,14 @@ app.get('/getplayers', async (req: any, res: any) => {
     res.send(players);  
 })
 
-app.post('/createplayer',async (req:any,res:any)=>{
+app.post('/createplayer',auth,async (req:any,res:any)=>{
     const {id,name,teamId,jerseyNumber,playerType}=req.body
     const player=createPlayer({id,name,teamId,jerseyNumber,playerType})
     res.send(player)
 })
 
 // start the match
-app.post('/creatematch', async (req: any, res: any) => {
+app.post('/creatematch',auth, async (req: any, res: any) => {
     const {matchDetails}=req.body
     const match= await startMatch(matchDetails);
     res.send(match);
@@ -70,14 +72,14 @@ app.put('/endmatch', async (req: any, res: any) => {
 })
 
 // update score
-app.put('/updatescore', async (req: any, res: any) => {
+app.put('/updatescore',auth, async (req: any, res: any) => {
     const {inningId,updates}=req.body
     const update = await updateScore(inningId, updates);
     res.send(update);
 })
 
 // update player when a batsman is dismissed or over is completed
-app.post('/updateplayerstat', async (req: any, res: any) => {
+app.post('/updateplayerstat',auth, async (req: any, res: any) => {
     const {id,matchId,updates} = req.body;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
