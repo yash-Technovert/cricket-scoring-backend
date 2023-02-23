@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/b43ebae6-e348-44aa-9d03-bee294584beb/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/tech-crickinfo",
+    "appService.deploySubpath": "."
+}
