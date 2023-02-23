@@ -1,7 +1,6 @@
 import { createUser, generateJwtToken, login } from './services/AuthenticationService';
-import {createPlayer, createTeam, endMatch, getAllTeams, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getPlayerStat, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
-import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
 
 const app = express();
@@ -42,7 +41,6 @@ app.get('/getteams', async (req: any, res: any) => {
     const teams = await getAllTeams();
     res.send(teams);
 })
-
 // get all players of a team
 app.get('/getplayers', async (req: any, res: any) => {
     const {teamId} = req.query;
@@ -78,26 +76,37 @@ app.put('/updatescore', async (req: any, res: any) => {
 
 // update player when a batsman is dismissed or over is completed
 app.post('/updateplayerstat', async (req: any, res: any) => {
-    const {id,matchId,updates} = req.body;
+    const {id,matchId,updates} = req.query;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
+})
+
+app.get('/getplayerstat',async(req:any,res:any)=>{
+    const {id}=req.query
+    const player=await getPlayerStat(id)
+    res.send(player)
 })
 
 
 // get score of an inning
 app.get('/getscore', async (req: any, res: any) => {
-    const {id, matchId} = req.body;
-    const score = await getScore(id,matchId);
+    const {matchId} = req.query;
+    const score = await getScore(matchId);
     res.send(score);
 })
 
 app.get('/getmatchinfo', async (req: any, res: any) => {
-    const {id} = req.body;
-    const match = await getMatchInfo(id);
+    const {matchId} = req.query;
+    const match = await getMatchInfo(matchId);
     res.send(match);
 })
 
-const port = process.env.port || 3000;
+app.get('/getmatches',async(req:any,res:any)=>{
+    const matches= await getMatches();
+    res.send(matches)
+})
+
+const port = process.env.port || 8080;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
