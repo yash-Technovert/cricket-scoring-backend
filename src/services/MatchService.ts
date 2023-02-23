@@ -23,8 +23,8 @@ export async function startMatch(matchDetails: CreateMatch) {
         tossDecision:matchDetails.tossDecision
     }
     await initiateMatch(newMatch);
-    await initiatePlayer(matchId,generateInningId(matchId,true),matchDetails.teamOnePlayers)
-    await initiatePlayer(matchId,generateInningId(matchId,false),matchDetails.teamTwoPlayers)
+    await initiatePlayer(matchId,matchDetails.teamOnePlayers)
+    await initiatePlayer(matchId,matchDetails.teamTwoPlayers)
     await initiateInning(matchId, true, matchDetails.teamOne)
     await initiateInning(matchId, false, matchDetails.teamTwo)
 
@@ -303,14 +303,13 @@ export async function getPlayerStat(matchId:string)
     return data;
 }
 
-async function initiatePlayer(matchId:string,inningId:string,players:any)
+async function initiatePlayer(matchId:string,players:any)
 {
     console.log(players)
     players.forEach(async (player:any) => {
         let {data,error}=await supabase
         .from('PlayerStat').insert({
             id:player.id,
-            inningId:inningId,
             name:player.name,
             matchId:matchId,
             runs:0,
