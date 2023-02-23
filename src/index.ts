@@ -1,7 +1,6 @@
 import { createUser, login } from './services/AuthenticationService';
-import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getScore,  startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
-import { generateMatchId} from './services/HelperService';
 import * as cors from 'cors';
 
 const app = express();
@@ -98,7 +97,7 @@ app.get('/getmatches',async(req:any,res:any)=>{
     res.send(matches)
 })
 
-const port = process.env.port || 3000;
+const port = process.env.port || 8080;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
