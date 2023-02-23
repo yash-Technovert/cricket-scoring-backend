@@ -1,5 +1,5 @@
 import { createUser, login } from './services/AuthenticationService';
-import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getPlayerStat, getScore, initiateInning, startMatch, updatePlayerStat, updateScore, getSelectedPlayers, getFinishedMatches } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getPlayerStat, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
 import * as cors from 'cors';
 
@@ -72,15 +72,15 @@ app.put('/updatescore', async (req: any, res: any) => {
 })
 
 // update player when a batsman is dismissed or over is completed
-app.put('/updateplayerstat', async (req: any, res: any) => {
+app.post('/updateplayerstat', async (req: any, res: any) => {
     const {id,matchId,updates} = req.query;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
 })
 
 app.get('/getplayerstat',async(req:any,res:any)=>{
-    const {matchId}=req.query
-    const player=await getPlayerStat(matchId)
+    const {id}=req.query
+    const player=await getPlayerStat(id)
     res.send(player)
 })
 
@@ -102,18 +102,6 @@ app.get('/getmatches',async(req:any,res:any)=>{
     const matches= await getMatches();
     res.send(matches)
 })
-
-app.get('/getselectedplayers',async (req:any,res:any)=>{
-    const {matchId}= req.query;
-    const selectedPlayers=await getSelectedPlayers(matchId);
-    res.send(selectedPlayers)
-})
-
-app.get('/getfinishedmatches',(req:any,res:any)=>{
-    const {matchId}=req.query;
-    const finishedMatches=getFinishedMatches(matchId);
-    res.send(finishedMatches)
-})  
 
 const port = process.env.port || 8080;
 app.listen(port, () => {
