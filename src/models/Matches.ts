@@ -1,7 +1,7 @@
 export class Matches{
-    id!: string;
-    InningOneId!: string;
-    InningTwoId!: string;
+    matchId!: string;
+    inningOneId!: string;
+    inningTwoId!: string;
     teamOne!: string;
     teamTwo!: string;
     tossWinner!: string;
@@ -12,4 +12,5 @@ export class Matches{
     teamTwoRuns!: number;
     teamTwoOvers!: number;
     teamTwoWickets!: number;
+    matchWinner!: string;
 }

@@ -88,8 +88,8 @@ app.get('/getscore', async (req: any, res: any) => {
 })
 
 app.get('/getmatchinfo', async (req: any, res: any) => {
-    const {id} = req.body;
-    const match = await getMatchInfo(id);
+    const {matchId} = req.query;
+    const match = await getMatchInfo(matchId);
     res.send(match);
 })
 

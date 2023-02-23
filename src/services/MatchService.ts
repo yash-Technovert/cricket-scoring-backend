@@ -104,9 +104,30 @@ export async function getMatches()
 {
     let {data,error}=await supabase.from('MatchStat').select('*')
     if(error) return error;
-    const inningData=await getInning()
-    let matches:Matches[]=[]
-    
+    const inningData:any=await getInning()
+    const matches:Matches[]=[]
+    data.forEach((match:any)=>{
+        let firstInning= inningData?.find((inning:any)=>inning?.matchId===match?.id && inning?.isFirstInning)
+        let secondInning= inningData?.find((inning:any)=>inning?.matchId===match?.id && !inning?.isFirstInning)
+        let matchData:Matches={
+            matchId:match.id,
+            teamOne:match?.teamOne,
+            teamTwo:match?.teamTwo,
+            tossWinner:match?.tossWinner,
+            tossDecision:match?.tossDecision,
+            matchWinner:match?.matchWinner,
+            inningOneId:firstInning?.id,
+            teamOneRuns:firstInning?.runsScored,
+            teamOneOvers:firstInning?.oversPlayed,
+            teamOneWickets:firstInning?.wickets,
+            inningTwoId:secondInning?.id,
+            teamTwoRuns:secondInning?.runsScored,
+            teamTwoOvers:secondInning?.oversPlayed,
+            teamTwoWickets:secondInning?.wickets
+        }
+        matches.push(matchData)
+    })
+    return matches;
 }
 
 export async function getInning()
