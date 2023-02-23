@@ -1,5 +1,5 @@
 import { createUser, login } from './services/AuthenticationService';
-import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getScore,  startMatch, updatePlayerStat, updateScore } from './services/MatchService';
+import {createPlayer, createTeam, endMatch, getAllTeams, getMatches, getMatchInfo, getPlayers, getPlayerStat, getScore, initiateInning, startMatch, updatePlayerStat, updateScore } from './services/MatchService';
 import express from 'express';
 import * as cors from 'cors';
 
@@ -73,9 +73,15 @@ app.put('/updatescore', async (req: any, res: any) => {
 
 // update player when a batsman is dismissed or over is completed
 app.post('/updateplayerstat', async (req: any, res: any) => {
-    const {id,matchId,updates} = req.body;
+    const {id,matchId,updates} = req.query;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
+})
+
+app.get('/getplayerstat',async(req:any,res:any)=>{
+    const {id,matchId}=req.query
+    const player=await getPlayerStat(id,matchId)
+    res.send(player)
 })
 
 

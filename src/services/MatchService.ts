@@ -13,6 +13,7 @@ const supabase = createClient(url, serviceKey)
 
 
 export async function startMatch(matchDetails: CreateMatch) {
+    console.log(matchDetails)
     let matchId = generateMatchId(matchDetails.teamOne, matchDetails.teamTwo);
     let newMatch:StartMatch={
         id:matchId,
@@ -22,6 +23,8 @@ export async function startMatch(matchDetails: CreateMatch) {
         tossDecision:matchDetails.tossDecision
     }
     await initiateMatch(newMatch);
+    await initiatePlayer(matchId,generateInningId(matchId,true),matchDetails.teamOnePlayers)
+    await initiatePlayer(matchId,generateInningId(matchId,false),matchDetails.teamTwoPlayers)
     await initiateInning(matchId, true, matchDetails.teamOne)
     await initiateInning(matchId, false, matchDetails.teamTwo)
 
@@ -180,7 +183,6 @@ export async function getScore(matchId:string)
         
         if(data[0]?.wickets===10 || data[0]?.oversPLayed>=6)
         {
-            console.log('MORNING')
             let scores: InningStatResponse =
              {
                 id:data[1]?.id1,
@@ -195,9 +197,10 @@ export async function getScore(matchId:string)
                     bye:data[1]?.bye,
                     legBye:data[1]?.legBye
                 },
-                matchId:data[1]?.matchId
+                matchId:data[1]?.matchId,
+                four:data[1]?.four,
+                six:data[1]?.six
             }
-            console.log(scores)
             return scores;
         }
         else{
@@ -214,7 +217,9 @@ export async function getScore(matchId:string)
                 bye:data[0]?.bye,
                 legBye:data[0]?.legBye
             },
-            matchId:data[0]?.matchId
+            matchId:data[0]?.matchId,
+            four:data[0]?.four,
+            six:data[0]?.six
         }
         return scores;
         }
@@ -222,7 +227,6 @@ export async function getScore(matchId:string)
     else{
         if(data[1]?.wickets===10 || data[1]?.oversPlayed>=6)
         {
-            console.log('EVENING')
             let scores: InningStatResponse =
             {
                 id:data[0]?.id,
@@ -237,12 +241,13 @@ export async function getScore(matchId:string)
                     bye:data[0]?.bye,
                     legBye:data[0]?.legBye
                 },
-                matchId:data[0]?.matchId
+                matchId:data[0]?.matchId,
+                four:data[0]?.four,
+                six:data[0]?.six
             }
             return scores;
         }
         else{
-            console.log('BYEEE')
         let scores: InningStatResponse =
          {
             id:data[1]?.id,
@@ -257,7 +262,9 @@ export async function getScore(matchId:string)
                 bye:data[1]?.bye,
                 legBye:data[1]?.legBye
             },
-            matchId:data[1]?.matchId
+            matchId:data[1]?.matchId,
+            four:data[1]?.four,
+            six:data[1]?.six
         }
         return scores;
         }
@@ -289,14 +296,33 @@ export async function updatePlayerStat(id: string, matchId: string, updates: obj
     return data;
 }
 
-async function InitiatePlayer(matchId:any,players:any)
+export async function getPlayerStat(id:string,matchId:string)
 {
+    let {data,error}=await supabase .from('PlayerStat').select('*').eq('id',id).eq('matchId',matchId)
+    if(error) return error;
+    return data;
+}
+
+async function initiatePlayer(matchId:string,inningId:string,players:any)
+{
+    console.log(players)
     players.forEach(async (player:any) => {
         let {data,error}=await supabase
         .from('PlayerStat').insert({
-            id:`${matchId}_${player.name.substring(4)}`,
+            id:player.id,
+            inningId:inningId,
             name:player.name,
             matchId:matchId,
+            runs:0,
+            ballsPlayed:0,
+            four:0,
+            six:0,
+            wickets:0,
+            overs:0,
+            runsConceded:0,
+            maiden:0,
+            disableBatting:0,
+            disableBowling:0
         })
         if(error) return error;
         return data;

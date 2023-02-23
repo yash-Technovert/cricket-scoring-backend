@@ -3,8 +3,8 @@ export class CreateMatch{
     teamTwo:string; 
     tossWinner:string;
     tossDecision:string;
-    teamOnePlaying11:[];
-    teamTwoPlaying11:[];
+    teamOnePlayers:[];
+    teamTwoPlayers:[];
 }
 
 export class StartMatch{
