@@ -303,9 +303,15 @@ export async function getPlayerStat(matchId:string)
     return data;
 }
 
+export async function getSinglePlayerStat(id:string,matchId:string)
+{
+    let {data,error}=await supabase .from('PlayerStat').select('*').eq('matchId',matchId).eq('id',id)
+    if(error) return error;
+    return data;
+}
+
 async function initiatePlayer(matchId:string,players:any)
 {
-    console.log(players)
     players.forEach(async (player:any) => {
         let {data,error}=await supabase
         .from('PlayerStat').insert({
@@ -326,6 +332,32 @@ async function initiatePlayer(matchId:string,players:any)
         if(error) return error;
         return data;
     })
+}
+
+export async function getFinishedMatches(matchId:string)
+{
+    let finishedMatches:any={
+        matchInfo:{},
+        firstInningStat:{},
+        secondInningStat:{},
+        teamOnePlayerStat:{},
+        teamTwoPlayerStat:{}
+    }
+    let {data,error}=await supabase .from('MatchStat').select('*').eq('id',matchId)
+    if(error) return error;
+    finishedMatches.matchInfo=data;
+
+    let {data:data1,error:error1}=await  supabase .from('InningStat').select('*').eq('matchId',matchId)
+    if(error1) return error1;
+    finishedMatches.firstInningStat=data1[0]?.isFirstInning==true?data1[0]:data1[1];
+    finishedMatches.secondInningStat=data1[0]?.isFirstInning==false?data1[0]:data1[1];
+
+    let {data:data2,error:error2}=await  supabase .from('PlayerStat').select('*').eq('matchId',matchId)
+    if(error2) return error2;
+    finishedMatches.teamOnePlayerStat=data2.filter((player:any)=>player.teamName==finishedMatches.matchInfo?.teamOne);
+    finishedMatches.teamTwoPlayerStat=data2.filter((player:any)=>player.teamName==finishedMatches.matchInfo?.teamTwo);
+
+    return finishedMatches
 }
 
 
