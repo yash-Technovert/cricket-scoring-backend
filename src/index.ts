@@ -72,7 +72,7 @@ app.put('/updatescore', async (req: any, res: any) => {
 })
 
 // update player when a batsman is dismissed or over is completed
-app.post('/updateplayerstat', async (req: any, res: any) => {
+app.put('/updateplayerstat', async (req: any, res: any) => {
     const {id,matchId,updates} = req.query;
     const update = await updatePlayerStat(id,matchId, updates);
     res.send(update);
