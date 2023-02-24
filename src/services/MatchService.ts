@@ -316,6 +316,7 @@ async function initiatePlayer(matchId:string,players:any)
         let {data,error}=await supabase
         .from('PlayerStat').insert({
             id:player.id,
+            teamId:player.teamId,
             name:player.name,
             matchId:matchId,
             runs:0,
@@ -354,8 +355,16 @@ export async function getFinishedMatches(matchId:string)
 
     let {data:data2,error:error2}=await  supabase .from('PlayerStat').select('*').eq('matchId',matchId)
     if(error2) return error2;
-    finishedMatches.teamOnePlayerStat=data2.filter((player:any)=>player.teamName==finishedMatches.matchInfo?.teamOne);
-    finishedMatches.teamTwoPlayerStat=data2.filter((player:any)=>player.teamName==finishedMatches.matchInfo?.teamTwo);
+
+    let {data:data3,error:error3}:any=await  supabase .from('Team').select('*').eq('teamName',finishedMatches?.firstInningStat?.teamName)
+    if(error3) return error3;
+
+    let {data:data4,error:error4}:any=await  supabase .from('Team').select('*').eq('teamName',finishedMatches?.secondInningStat?.teamName)
+    if(error4) return error4;
+
+
+    finishedMatches.teamOnePlayerStat=data2.filter((player:any)=>player.teamId==data3[0]?.id);
+    finishedMatches.teamTwoPlayerStat=data2.filter((player:any)=>player.teamId==data4[0]?.id);
 
     return finishedMatches
 }
